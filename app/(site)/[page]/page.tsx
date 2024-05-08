@@ -10,8 +10,6 @@ type Props = {
 export default async function Page({ params }: Props) {
   const slug = params.page;
   const page = await getPage(slug);
-  console.log(page.content);
-
   return (
     <div>
       <h1 className="text-3xl">{page.name}</h1>

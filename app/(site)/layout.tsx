@@ -19,7 +19,7 @@ export default async function RootLayout({
   const pages = await getPages();
   return (
     <html lang="en">
-      <body className="max-w-3xl mx-auto py-10">
+      <body className="max-w-3xl mx-auto py-10 sm:w-95vw md:w-95vw lg:w-95vw xl:w-95vw p-10">
         <header className="flex justify-between">
           <Link
             href={`/`}
@@ -37,7 +37,7 @@ export default async function RootLayout({
             })}
           </nav>
         </header>
-        <main className="py-20">{children}</main>
+        <main className="p-5">{children}</main>
       </body>
     </html>
   );
