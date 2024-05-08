@@ -6,6 +6,10 @@ This project was created as part of a crash course on Sanity with Next.js.
 
 This project serves as a playground to experiment with Sanity CMS and Next.js. It provides a starting point for building web applications that leverage the power of Sanity and Next.js.
 
+## Demo
+
+You can find a demo of the project here: `https://nextjs-sanity-crash-course-qwcqturap-pablo-oses-projects.vercel.app/`
+
 ## Features
 
 - Integration of Sanity CMS with Next.js
