@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@portabletext/react": "^3.0.18",
+    "@sanity/webhook": "^4.0.4",
     "next": "14.2.3",
     "next-sanity": "^9.0.14",
     "react": "^18",
