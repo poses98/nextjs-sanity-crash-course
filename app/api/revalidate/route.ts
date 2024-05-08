@@ -1,49 +1,38 @@
 import { isValidSignature, SIGNATURE_HEADER_NAME } from '@sanity/webhook';
-import type { NextApiRequest, NextApiResponse } from 'next';
+import { type NextRequest, NextResponse } from 'next/server';
+import { parseBody } from 'next-sanity/webhook';
+import { revalidateTag } from 'next/cache';
 
-type Data = {
-  message: string;
+type WebhookPayload = {
+  _type: string;
 };
-
-export default async function post(
-  req: NextApiRequest,
-  res: NextApiResponse<Data>
-) {
-  const secret = process.env.SANITY_REVALIDATE_SECRET || '';
-  const signature = req.headers[SIGNATURE_HEADER_NAME] as string;
-  const body = await readBody(req); // Read the body into a string
-
-  if (req.method !== 'POST') {
-    return res.status(401).json({ message: 'Must be a POST request' });
-  }
-
-  if (!isValidSignature(body, signature, secret)) {
-    res.status(401).json({ message: 'Invalid signature' });
-    return;
-  }
-
+export async function POST(req: NextRequest) {
   try {
-    const { _type: type, slug } = JSON.parse(body);
+    const { isValidSignature, body } = await parseBody<WebhookPayload>(
+      req,
+      process.env.SANITY_REVALIDATE_SECRET
+    );
 
-    switch (type) {
-      case 'project':
-        await res.revalidate(`/projects/${slug.current}`); // The particular project
-        await res.revalidate(`/projects`); // The Projects page
-        await res.revalidate(`/`); // The landing page featured projects
-        return res.json({
-          message: `Revalidated "${type}" with slug "${slug.current}"`,
-        });
-      case 'page':
-        await res.revalidate(`/${slug.current}`); // The particular project
-        await res.revalidate(`/`); // The landing page featured projects
-        return res.json({
-          message: `Revalidated "${type}" with slug "${slug.current}"`,
-        });
+    if (!isValidSignature) {
+      const message = 'Invalid signature';
+      return new Response(JSON.stringify({ message, isValidSignature, body }), {
+        status: 401,
+      });
     }
 
-    return res.json({ message: 'No managed type' });
-  } catch (err) {
-    return res.status(500).send({ message: 'Error revalidating' });
+    if (!body?._type) {
+      const message = 'Bad Request';
+      return new Response(JSON.stringify({ message, body }), { status: 400 });
+    }
+
+    // If the `_type` is `page`, then all `client.fetch` calls with
+    // `{next: {tags: ['page']}}` will be revalidated
+    revalidateTag(body._type);
+
+    return NextResponse.json({ body });
+  } catch (err: any) {
+    console.error(err);
+    return new Response(err.message, { status: 500 });
   }
 }
 
