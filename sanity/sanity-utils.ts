@@ -1,8 +1,9 @@
 import { Project } from '@/types/Project';
 import { Page } from '@/types/Page';
 import { createClient, groq } from 'next-sanity';
+import { sanityFetch } from './sanity.client';
 
-export async function getProjects(): Promise<Project[]> {
+/* export async function getProjects(): Promise<Project[]> {
   const client = createClient({
     projectId: 'gv7y171m',
     dataset: 'production',
@@ -19,6 +20,21 @@ export async function getProjects(): Promise<Project[]> {
         url,
         content
     }`);
+}
+ */
+
+export async function getProjects(): Promise<Project[]> {
+  const query = groq`*[_type == "project"]{
+    _id,
+    _createdAt,
+    name,
+    "slug":slug.current,
+    "image":image.asset->url,
+    url,
+    content
+}`;
+
+  return await sanityFetch<Project[]>({ query: query, tags: ['project'] });
 }
 
 export async function getProject(slug: string): Promise<Project> {
