@@ -4,6 +4,7 @@ import {
   type ClientConfig,
   type QueryParams,
 } from '@sanity/client';
+import { groq } from 'next-sanity';
 
 const config: ClientConfig = {
   projectId: 'gv7y171m',
