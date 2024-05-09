@@ -38,59 +38,46 @@ export async function getProjects(): Promise<Project[]> {
 }
 
 export async function getProject(slug: string): Promise<Project> {
-  const client = createClient({
-    projectId: 'gv7y171m',
-    dataset: 'production',
-    apiVersion: '2024-05-06',
-    useCdn: false,
-  });
+  const query = groq`*[_type == "project" && slug.current == $slug][0]{
+      _id,
+      _createdAt,
+      name,
+      "slug":slug.current,
+      "image":image.asset->url,
+      url,
+      content
+  }`;
 
-  return await client.fetch(
-    groq`*[_type == "project" && slug.current == $slug][0]{
-        _id,
-        _createdAt,
-        name,
-        "slug":slug.current,
-        "image":image.asset->url,
-        url,
-        content
-    }`,
-    { slug }
-  );
+  return await sanityFetch<Project>({
+    query: query,
+    qParams: { slug },
+    tags: ['project'],
+  });
 }
 
 export async function getPages(): Promise<Page[]> {
-  const client = createClient({
-    projectId: 'gv7y171m',
-    dataset: 'production',
-    apiVersion: '2024-05-06',
-    useCdn: false,
-  });
-  return await client.fetch(groq`*[_type == "page"]{
+  const query = groq`*[_type == "page"]{
     _id,
     _createdAt,
     name,
     "slug":slug.current,
     content
-  }`);
+  }`;
+  return await sanityFetch<Page[]>({ query: query, tags: ['page'] });
 }
 
 export async function getPage(slug: string): Promise<Page> {
-  const client = createClient({
-    projectId: 'gv7y171m',
-    dataset: 'production',
-    apiVersion: '2024-05-06',
-    useCdn: false,
-  });
+  const query = groq`*[_type=="page" && slug.current == $slug][0]{
+  _id,
+  _createdAt,
+  name,
+  "slug":slug.current,
+  content
+}`;
   // params go with $param and declared in the second attr of the fetch
-  return await client.fetch(
-    groq`*[_type=="page" && slug.current == $slug][0]{
-    _id,
-    _createdAt,
-    name,
-    "slug":slug.current,
-    content
-  }`,
-    { slug }
-  );
+  return await sanityFetch<Page>({
+    query: query,
+    qParams: { slug },
+    tags: ['page'],
+  });
 }
